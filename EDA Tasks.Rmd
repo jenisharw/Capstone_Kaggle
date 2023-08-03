@@ -1,0 +1,253 @@
+---
+title: "EDA Tasks by Kaggle Project-5"
+Names: Anjan Kumar Regulavalasa Dominique Miranda Tarun Gulati Jenisha Rawal
+date: "2023-06-18"
+output:
+  pdf_document: default
+  html_document: default
+---
+# Table of Contents
+> Introduction to Business Problem
+> Task 1: Explore the target variable in application_{train|test}.csv. Is the data unbalanced with respect to the target?
+> Task 2: Explore relationship between target and predictors, looking for potentially strong predictors that could be included later in a model.
+> Task 3: Loading the skimr package and the janitor package for data exploration and data cleaning.
+> Task 4: Exploration of Missing data Scope in train|test Data.
+> Task 5: Checking for Columns with near-zero or zero variance and outliers.
+> Task 6: Will the input data need to be transformed in order to be used in a model? 
+> Task 7: Joining application_train.csv with transactional data in, for example, bureau.csv or previous_application.csv.
+> Task 8: Exploration of joined transactional data.
+> Results: What does the data signify?
+> Group Members Contribution
+
+>Introduction to Business Problem: A majority of the loan applications are rejected because of insufficient or non-existent credit histories of the applicant, who are forced to turn to untrustworthy lenders for their financial needs. To address this issue, Home Credit uses both Telco Data as well as Transactional Data, to predict the loan repayment abilities of the applicants. If an applicant is deemed fit and capable to repay a loan, his application is accepted or otherwise rejected.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Task 1: Explore the target variable in application_{train|test}.csv. Is the data unbalanced with respect to the target? 
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(caret)
+library(e1071)
+test <- read.csv(file = "application_test.csv", stringsAsFactors = TRUE)
+train <- read.csv(file = "application_train.csv", stringsAsFactors = TRUE)
+
+str(train)
+summary(train)
+
+str(test)
+summary(test)
+
+```
+
+```{r}
+barplot(table(train$TARGET),col="blue")
+prop.table(table(train$TARGET))
+simple_accuracy_reject <- train %>% summarize(credit_default = mean(TARGET == 0)) 
+simple_accuracy_reject
+simple_accuracy_accept <- train %>% summarize(credit_default = mean(TARGET == 1))
+simple_accuracy_accept
+# unbalanced because it is skewed, as (target==0) has a proportion of approximately 0.92, and (target==1) has a proportion of approximately 0.08. The accuracy of the model with the majority class classifier is 91.92%.
+
+```
+
+>With respect to the target, the data is unbalanced because it is skewed.
+
+#Task 2: Explore relationship between target and predictors, looking for potentially strong predictors that could be included later in a model.
+
+```{r}
+ggplot(train, aes(x = factor(TARGET), y = AMT_CREDIT)) + 
+  geom_boxplot() +
+  labs(title = "TARGET ~ AMT_CREDIT")
+
+ggplot(train,aes(x=AMT_INCOME_TOTAL))+
+  geom_histogram(fill="darkblue") +
+  xlab("Income") +  
+  ylab("Frequency") + 
+  ggtitle("Histogram of Income")
+
+barplot(table(train$TARGET, train$NAME_CONTRACT_TYPE))
+
+ggplot(train, aes(x = TARGET, col = NAME_CONTRACT_TYPE)) + geom_density() + labs(title = "TARGET ~ NAME_CONTRACT_TYPE")
+```
+
+```{r}
+#correlation
+library(psych)
+# Read the data
+
+# Specify the target variable and predictors
+pairs.panels(train[2:9])
+pairs.panels(test[2:9])
+```
+
+>Potentially strong predictors are NAME_CONTRACT_TYPE,AMT_INCOME_TOTAL, and AMT_CREDIT.
+
+# Task-3 Loading the skimr package and the janitor package for data exploration and data cleaning.
+
+```{r}
+# install.packages("skimr")
+library(skimr)
+
+# install.packages("janitor")
+library(janitor)
+
+# install.packages("readr")
+library(readr)
+
+summary <- skim(train)
+print(summary)
+
+```
+
+# Task-4 Exploration of Missing data Scope in train|test Data.
+```{r warning = FALSE}
+
+# Explore missing data wihtin the training dataset
+
+train_missing_data <- skimr::skim(train)
+train_missing_data <- arrange(train_missing_data, desc(n_missing))
+print(train_missing_data)
+
+# Explore missing data within the testing dataset
+
+test_missing_data <- skimr::skim(test)
+test_missing_data <- arrange(test_missing_data, desc(n_missing))
+print(test_missing_data)
+
+```
+
+```{r}
+# Calculation of missing values percentage in each column within the training dataset
+
+train_missing_percentages <- train_missing_data %>%
+  janitor::tabyl(everything()) %>%
+  janitor::adorn_percentages("col")
+
+# Calculation of missing values percentage in each column within the testing dataset
+
+test_missing_percentages <- test_missing_data %>%
+  janitor::tabyl(everything()) %>%
+  janitor::adorn_percentages("col")
+
+# Print columns with missing data and their percentages for training data
+print(train_missing_percentages)
+
+# Print columns with missing data and their percentages for test data
+print(test_missing_percentages)
+```
+> These percentages indicate the proportion of missing values within each column. Higher percentages suggest that a larger portion of the data in those columns is missing.
+
+```{r}
+# Impute missing values with 0 in the 'OWN_CAR_AGE' column
+train <- train %>%
+  replace_na(list(OWN_CAR_AGE = 0))
+View(train)
+print(head(train))
+```
+
+```{r}
+
+# Removal of columns with high percentage of missing data in train dataset
+
+na_counts <- apply(train, 2, function(x) sum(is.na(x)))
+missing_percent <- na_counts / nrow(train)
+cols_to_remove <- names(missing_percent[missing_percent > 0.5])
+train_clean_data <- train[, !(names(train) %in% cols_to_remove)]
+print(head(train_clean_data))
+
+```
+
+```{r}
+# Extraction of the "OWN_CAR_AGE" column
+OWN_CAR_AGE <- train_clean_data$OWN_CAR_AGE
+
+# Defining the breaks and labels
+breaks <- c(-Inf, 0, 5, 10, Inf)
+labels <- c("0", "0-5", "5-10", "10+")
+
+# Create bins
+OWN_CAR_AGE_BINS <- cut(OWN_CAR_AGE, breaks = breaks, labels = labels)
+
+# Append OWN_CAR_AGE_BINS to train dataset
+train_clean_data <- cbind(train_clean_data, OWN_CAR_AGE_BINS)
+
+print(head(train_clean_data[, c("OWN_CAR_AGE_BINS", "OWN_CAR_AGE")], n=10))
+
+```
+
+> Here, columns that have more than 50% of missing values have been removed, expect 'OWN_CAR_AGE' column. The null values of this column has been replaced by '0'. 
+> Also, "OWN_CAR_AGE_BINS" column has been created for better interpretation of the "OWN_CAR_AGE" column.
+> After cleaning and exploring the missing data, we have 307,511 rows and 86 columns.
+
+# Task 5: Checking for Columns with near-zero or zero variance and outliers
+```{r warning = FALSE}
+
+# Check for columns with near-zero variance
+zero_var_cols <- names(train_clean_data)[apply(train_clean_data, 2, var) < 0.001] 
+
+# Output columns with near-zero variance
+if (length(zero_var_cols) > 0) {
+  cat("Columns with near-zero variance:", paste(zero_var_cols, collapse = ", "), "\n")
+} else {
+  cat("No columns with near-zero variance found.\n")
+}
+```
+```{r warning = FALSE}
+# Check for columns with zero variance
+zero_var_cols <- names(train_clean_data)[apply(train_clean_data, 2, var) == 0] 
+
+# Output columns with zero variance
+if (length(zero_var_cols) == 0) {
+  cat("Columns with zero variance:", paste(zero_var_cols, collapse = ", "), "\n")
+} else {
+  cat("No columns with zero variance found.\n")
+}
+```
+
+```{r warning = FALSE}
+
+# Calculation of the outliers for each column
+
+set.seed(123)
+threshold <- 3
+num_outliers <- numeric()
+
+for (col_name in colnames(train_clean_data)) {
+  column <- train_clean_data[[col_name]]
+  
+  if (is.factor(column)) {
+    num_outliers[col_name] <- sum(all(duplicated(column)[-1L]))
+  } else {
+    lower_bound <- mean(column) - threshold * sd(column)
+    upper_bound <- mean(column) + threshold * sd(column)
+    outliers <- column[column < lower_bound | column > upper_bound]
+    num_outliers[col_name] <- length(outliers)
+  }
+}
+
+for (col_name in names(num_outliers)) {
+  cat("Column", col_name, ":", num_outliers[col_name], "outliers\n")
+}
+```
+
+> In this scenario, it is stated that the target variable has 24,825 outliers. However, it is important to clarify that since the variable is binary, meaning it can only take values of 0 or 1, the concept of outliers does not apply in this context. The treatment and inclusion of these outlier outputs will be appropriately addressed during the modeling phase.
+> Additionally, there are no columns with zero variance. However, there are few columns with near-zero variance.
+
+# Task 6: Will the input data need to be transformed in order to be used in a model?
+
+```{r}
+train_cat_variables <- names(train_clean_data)[sapply(train_clean_data, is.factor)]
+
+# Listing of the categorical variables
+train_cat_variables
+```
+> Yes, the input data needs to be transformed inorder to used in a model. This involves preprocessing input data for model utilization which typically encompasses several essential tasks:
+
+> 1.Handling missing values: This involves addressing the presence of missing data, which can entail imputing the missing values or removing rows or columns with incomplete information. The missing values of columns were addressed by replacing null values in "OWN_CAR_AGE" and by removal of columns with high percentage of missing values.
+> 2.Encoding categorical variables: The dataset contains categorical variables which suggests to convert them into numerical format to ensure compatibility with the model. This process may involve techniques such as one-hot encoding and other appropriate methods.
+> 3.Scaling or normalizing numeric variables: In certain situations, numeric variables may require scaling or normalization to bring them into a uniform range. This step ensures that the magnitudes of these variables do not disproportionately influence the model's performance.
+
