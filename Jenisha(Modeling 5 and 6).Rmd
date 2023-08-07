@@ -1,0 +1,86 @@
+---
+title: "Untitled"
+author: "Jenisha"
+date: "2023-07-07"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Load the libraries
+library(tidyverse)
+library(caret)
+```
+
+```{r}
+# Load the data
+test <- read.csv("application_test.csv", stringsAsFactors = TRUE)
+train <- read.csv("application_train.csv", stringsAsFactors = TRUE)
+```
+
+```{r}
+numeric_data <- c('AMT_INCOME_TOTAL', 'AMT_CREDIT', 
+                'AMT_GOODS_PRICE', 'AMT_ANNUITY', 
+                'DAYS_REGISTRATION', 'DAYS_EMPLOYED', 'DAYS_ID_PUBLISH', 
+                'APARTMENTS_AVG', 'BASEMENTAREA_AVG', 'YEARS_BEGINEXPLUATATION_AVG', 'YEARS_BUILD_AVG')
+```
+
+```{r}
+preObj <- preProcess(test[numeric_data], method=c("center", "scale"))
+newData <- predict(preObj, test[numeric_data])
+```
+
+```{r}
+# Normalize the data
+normalized_data <- preProcess(test[numeric_data], method=c("range"))
+normalized_data
+```
+
+```{r}
+# select data minus TARGET variable
+selected_data <- train[, !(names(train) %in% c("TARGET"))]
+summary(selected_data)
+```
+
+```{r}
+# convert TARGET variable into Factor variable
+factor_variable <- as.factor(train$TARGET)
+```
+
+```{r}
+#Upsample the data
+# The 'upSample' function from the 'caret' package performs upsampling by randomly duplicating instances in the minority class to match the majority class.
+
+# 'selected data' selects all columns except the TARGET variable.
+# 'factor_variable' is the TARGET variable to be upsampled. It has to be in factor
+# 'yname = "TARGET"' specifies the name of the target variable in the upsampled data.
+
+upsampled_data <- upSample(selected_data, factor_variable, yname = "TARGET")
+```
+
+```{r}
+upsampled_data$TARGET
+```
+
+```{r}
+# Count the number of instances in each class after upsampling
+upsampled_class_counts <- table(upsampled_data$TARGET)
+print(upsampled_class_counts)
+```
+
+```{r}
+# The 'downSample' function from the 'caret' package performs downsampling by randomly removing instances from the majority class to match the minority class.
+
+downsampled_data <- downSample(selected_data, factor_variable, yname = "TARGET")
+```
+
+```{r}
+# Count the number of instances in each class after downsampling
+downsampled_class_counts <- table(downsampled_data$TARGET)
+print(downsampled_class_counts)
+```
+
+
