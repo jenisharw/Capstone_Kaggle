@@ -1,6 +1,6 @@
 ---
 title: "EDA Tasks by Kaggle Project-5"
-Names: Anjan Kumar Regulavalasa Dominique Miranda Tarun Gulati Jenisha Rawal
+Names: Jenisha Rawal
 date: "2023-06-18"
 output:
   pdf_document: default
