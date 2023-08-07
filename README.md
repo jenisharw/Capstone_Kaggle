@@ -17,3 +17,15 @@ In EDA I've been actively involved in various critical data preprocessing and an
 
 
 Similarly, As a member my contribution to the modeling involves the analysis and understanding of the data transformations, upsampling, and downsampling strategies, as well as recognizing the implications of these techniques on the model performance.  I have figure it ourt that upsampling does not loose information then downsampling because downsampling may loose information.So, upsampling is generally a better approach as it preserves more data and thus enhances the model's potential for better performance.   
+# Business Value of the solution 
+The solution holds substantial business value for Home Credit. By leveraging alternative data and advanced analytics, the company can effectively address the challenge of loan application rejections caused by insufficient credit histories. This empowers Home Credit to extend its services to a wider and more diverse customer base, capturing a previously underserved market segment. The accurate prediction of loan repayment abilities enhances decision-making, minimizing default risks and optimizing loan approval processes. As a result, Home Credit can achieve higher customer acceptance rates while ensuring a sound financial standing. This not only contributes to revenue growth through an expanded clientele but also establishes Home Credit as a reliable and inclusive financial partner. The solution's impact on mitigating default risks, increasing financial accessibility, and fostering customer trust aligns with the company's strategic goals, positioning Home Credit as a leader in promoting financial inclusivity and sustainability.
+# Difficulty  that group handle:
+The challenges our group encountered during the project were primarily centered around data quality and model optimization. Dealing with missing data and deciding on the most appropriate methods for imputation or removal proved to be a complex task, as it required careful consideration of potential impacts on the overall model performance.Striking the right balance between upsampling and downsampling techniques was essential to prevent issues like overfitting or inadequate representation of certain classes. Model selection and optimization also posed challenges.Despite these challenges, our collective efforts enabled us to find effective solutions and enhance the project's overall outcome.
+ # What you learned in the project
+I had a great time working on my first Capstone project. It taught me a lot about different things. I learned how to handle missing data, change categorical info into numbers, and balance uneven groups in data. I also saw how exploring data helps us understand it better. Working with a team showed me how important it is to talk well and work together. The project also made me realize how using smart data techniques can solve real-world problems. Overall, I got practical experience in dealing with all parts of data science, which helps me solve tricky business problems using data.
+
+
+
+
+
+
