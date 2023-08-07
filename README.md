@@ -10,7 +10,7 @@ Detect individuals likely to default on loans.
 Attain elevated revenue levels.
 The project is managed by a team including myself, Jenisha Rawal, Tarun Gulati, and Anjan Kumar.
 # Solution my Group have conducted 
-
+# Contribution in this project:
 In EDA I've been actively involved in various critical data preprocessing and analysis tasks. I've utilized the provided code to identify columns with near-zero variance, which is crucial for pinpointing variables that might not significantly impact the model's predictions. Furthermore, I've tackled the challenge of missing data by either replacing null values in the "OWN_CAR_AGE" column or removing columns with substantial missing values. This ensures that the data used for model development is both complete and accurate. Recognizing the categorical variables present in the dataset, I've appropriately emphasized the need to transform them into numerical format, which is essential for machine learning models that require numerical input. Understanding the importance of data transformation to align it with modeling requirements, I've demonstrated my grasp of key preprocessing concepts. These actions collectively reflect my competence in handling data preprocessing, a critical element in building robust and effective machine learning models.
 
 
